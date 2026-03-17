@@ -1,0 +1,583 @@
+<Window x:Class="DriftCore.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="DriftCore"
+        Height="720" Width="980"
+        MinHeight="640" MinWidth="860"
+        Background="{StaticResource BgBrush}"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        ResizeMode="CanResizeWithGrip"
+        WindowStartupLocation="CenterScreen">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="44"/>   <!-- Title bar -->
+            <RowDefinition Height="*"/>    <!-- Content -->
+            <RowDefinition Height="28"/>   <!-- Status bar -->
+        </Grid.RowDefinitions>
+
+        <!-- ════════════════════════════════════════════════════════════
+             TITLE BAR
+        ════════════════════════════════════════════════════════════ -->
+        <Grid Grid.Row="0"
+              Background="{StaticResource SurfaceBrush}"
+              MouseDown="TitleBar_MouseDown">
+
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- App name + indicator -->
+            <StackPanel Grid.Column="0" Orientation="Horizontal"
+                        VerticalAlignment="Center" Margin="16,0,0,0">
+                <Ellipse x:Name="StatusIndicator"
+                         Width="10" Height="10"
+                         Fill="{StaticResource RedBrush}"
+                         Margin="0,0,10,0"/>
+                <TextBlock Text="DRIFTCORE"
+                           Foreground="{StaticResource TextBrush}"
+                           FontSize="13" FontWeight="Bold"
+                           VerticalAlignment="Center"/>
+                <Border Background="#1A2A44" CornerRadius="4"
+                        Padding="6,2" Margin="12,0,0,0">
+                    <TextBlock Text="v1.0" Foreground="{StaticResource AccentBrush}"
+                               FontSize="10" FontWeight="Bold"/>
+                </Border>
+            </StackPanel>
+
+            <!-- Controller connected label -->
+            <TextBlock x:Name="TitleControllerLabel"
+                       Grid.Column="1"
+                       Text="No controller detected"
+                       Foreground="{StaticResource SubtextBrush}"
+                       FontSize="11"
+                       HorizontalAlignment="Center"
+                       VerticalAlignment="Center"/>
+
+            <!-- Window controls -->
+            <StackPanel Grid.Column="2" Orientation="Horizontal"
+                        VerticalAlignment="Center" Margin="0,0,8,0">
+                <Button x:Name="BtnMinimize" Content="─"
+                        Width="36" Height="28"
+                        Foreground="{StaticResource SubtextBrush}"
+                        Background="Transparent" BorderThickness="0"
+                        Cursor="Hand" FontSize="12"
+                        Click="BtnMinimize_Click"/>
+                <Button x:Name="BtnClose" Content="✕"
+                        Width="36" Height="28"
+                        Foreground="{StaticResource SubtextBrush}"
+                        Background="Transparent" BorderThickness="0"
+                        Cursor="Hand" FontSize="12"
+                        Click="BtnClose_Click"/>
+            </StackPanel>
+        </Grid>
+
+        <!-- Thin accent line under title bar -->
+        <Rectangle Grid.Row="0" Height="1" VerticalAlignment="Bottom"
+                   Fill="{StaticResource BorderBrush}"/>
+
+        <!-- ════════════════════════════════════════════════════════════
+             MAIN CONTENT
+        ════════════════════════════════════════════════════════════ -->
+        <Grid Grid.Row="1" Margin="12,12,12,8">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="210"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="226"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- ── LEFT PANEL: Controller Info + Calibration ─────────── -->
+            <StackPanel Grid.Column="0" Margin="0,0,10,0" VerticalAlignment="Top">
+
+                <!-- Controller Status Card -->
+                <Border Style="{StaticResource Card}" Margin="0,0,0,10">
+                    <StackPanel>
+                        <TextBlock Text="CONTROLLER" Style="{StaticResource SectionLabel}"
+                                   Margin="0,0,0,12"/>
+
+                        <!-- Status rows -->
+                        <Grid Margin="0,0,0,8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="Device"
+                                       Style="{StaticResource SectionLabel}"
+                                       VerticalAlignment="Center"/>
+                            <TextBlock x:Name="LblDevice" Grid.Column="1"
+                                       Text="—" Style="{StaticResource AccentValue}"/>
+                        </Grid>
+
+                        <Grid Margin="0,0,0,8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="Slot"
+                                       Style="{StaticResource SectionLabel}"
+                                       VerticalAlignment="Center"/>
+                            <TextBlock x:Name="LblSlot" Grid.Column="1"
+                                       Text="—" Style="{StaticResource ValueLabel}"/>
+                        </Grid>
+
+                        <Grid Margin="0,0,0,8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="Status"
+                                       Style="{StaticResource SectionLabel}"
+                                       VerticalAlignment="Center"/>
+                            <TextBlock x:Name="LblStatus" Grid.Column="1"
+                                       Text="Disconnected" Foreground="{StaticResource RedBrush}"
+                                       FontSize="12" FontWeight="SemiBold"/>
+                        </Grid>
+
+                        <Grid Margin="0,0,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="Virtual"
+                                       Style="{StaticResource SectionLabel}"
+                                       VerticalAlignment="Center"/>
+                            <TextBlock x:Name="LblVirtual" Grid.Column="1"
+                                       Text="Offline" Foreground="{StaticResource RedBrush}"
+                                       FontSize="12" FontWeight="SemiBold"/>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+                <!-- DriftCore Info Card -->
+                <Border Style="{StaticResource Card}" Margin="0,0,0,10">
+                    <StackPanel>
+                        <TextBlock Text="DRIFTCORE" Style="{StaticResource SectionLabel}"
+                                   Margin="0,0,0,12"/>
+
+                        <Grid Margin="0,0,0,8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="L Offset"
+                                       Style="{StaticResource SectionLabel}"
+                                       VerticalAlignment="Center"/>
+                            <TextBlock x:Name="LblLeftCenter" Grid.Column="1"
+                                       Text="0.00, 0.00" Style="{StaticResource ValueLabel}"
+                                       FontFamily="Consolas" FontSize="11"/>
+                        </Grid>
+
+                        <Grid Margin="0,0,0,8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="R Offset"
+                                       Style="{StaticResource SectionLabel}"
+                                       VerticalAlignment="Center"/>
+                            <TextBlock x:Name="LblRightCenter" Grid.Column="1"
+                                       Text="0.00, 0.00" Style="{StaticResource ValueLabel}"
+                                       FontFamily="Consolas" FontSize="11"/>
+                        </Grid>
+
+                        <Grid Margin="0,0,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="Spikes"
+                                       Style="{StaticResource SectionLabel}"
+                                       VerticalAlignment="Center"/>
+                            <TextBlock x:Name="LblSpikes" Grid.Column="1"
+                                       Text="0" Style="{StaticResource ValueLabel}"
+                                       FontFamily="Consolas" FontSize="11"/>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+                <!-- Action buttons -->
+                <Button x:Name="BtnCalibrate"
+                        Content="CALIBRATE NOW"
+                        Style="{StaticResource SecondaryButton}"
+                        Margin="0,0,0,8"
+                        Click="BtnCalibrate_Click"
+                        ToolTip="Snap the learned center to the current idle stick position"/>
+
+                <Button x:Name="BtnReconnect"
+                        Content="RECONNECT CONTROLLER"
+                        Style="{StaticResource SecondaryButton}"
+                        Margin="0,0,0,8"
+                        Click="BtnReconnect_Click"/>
+
+                <!-- Enable Toggle -->
+                <Button x:Name="BtnToggle"
+                        Content="⬤  CORRECTION ON"
+                        Style="{StaticResource MainToggle}"
+                        Click="BtnToggle_Click"/>
+            </StackPanel>
+
+            <!-- ── CENTER: Stick Visualizers ─────────────────────────── -->
+            <Grid Grid.Column="1" Margin="0,0,10,0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <!-- Visualizer header -->
+                <Grid Grid.Row="0" Margin="0,0,0,10">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="LEFT STICK"
+                               Style="{StaticResource SectionLabel}"
+                               HorizontalAlignment="Center"/>
+                    <TextBlock Grid.Column="1" Text="RIGHT STICK"
+                               Style="{StaticResource SectionLabel}"
+                               HorizontalAlignment="Center"/>
+                </Grid>
+
+                <!-- Visualizer canvases -->
+                <Grid Grid.Row="1">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Left stick canvas -->
+                    <Border Grid.Column="0" Style="{StaticResource Card}"
+                            Margin="0,0,6,0" Padding="0">
+                        <Canvas x:Name="CanvasLeft"
+                                Background="Transparent"
+                                ClipToBounds="True"
+                                SizeChanged="CanvasLeft_SizeChanged">
+
+                            <!-- Background circle -->
+                            <Ellipse x:Name="LeftBgCircle"
+                                     Stroke="#2A2A42" StrokeThickness="1"
+                                     Fill="#0F0F1A"/>
+
+                            <!-- Grid lines -->
+                            <Line x:Name="LeftHLine"
+                                  Stroke="#2A2A42" StrokeThickness="0.5"/>
+                            <Line x:Name="LeftVLine"
+                                  Stroke="#2A2A42" StrokeThickness="0.5"/>
+
+                            <!-- Deadzone ring -->
+                            <Ellipse x:Name="LeftDeadzoneCircle"
+                                     Stroke="#FFB83088" StrokeThickness="1"
+                                     Fill="Transparent"/>
+
+                            <!-- Raw position (red) -->
+                            <Ellipse x:Name="LeftRawDot"
+                                     Width="12" Height="12"
+                                     Fill="#CC4455" Opacity="0.8"/>
+
+                            <!-- Corrected position (cyan) -->
+                            <Ellipse x:Name="LeftCorrectedDot"
+                                     Width="14" Height="14"
+                                     Fill="#00D4FF"/>
+
+                            <!-- Center cross -->
+                            <Line x:Name="LeftCenterH"
+                                  Stroke="#00D4FF44" StrokeThickness="0.5"/>
+                            <Line x:Name="LeftCenterV"
+                                  Stroke="#00D4FF44" StrokeThickness="0.5"/>
+                        </Canvas>
+                    </Border>
+
+                    <!-- Right stick canvas -->
+                    <Border Grid.Column="1" Style="{StaticResource Card}"
+                            Margin="6,0,0,0" Padding="0">
+                        <Canvas x:Name="CanvasRight"
+                                Background="Transparent"
+                                ClipToBounds="True"
+                                SizeChanged="CanvasRight_SizeChanged">
+
+                            <Ellipse x:Name="RightBgCircle"
+                                     Stroke="#2A2A42" StrokeThickness="1"
+                                     Fill="#0F0F1A"/>
+                            <Line x:Name="RightHLine"
+                                  Stroke="#2A2A42" StrokeThickness="0.5"/>
+                            <Line x:Name="RightVLine"
+                                  Stroke="#2A2A42" StrokeThickness="0.5"/>
+                            <Ellipse x:Name="RightDeadzoneCircle"
+                                     Stroke="#FFB83088" StrokeThickness="1"
+                                     Fill="Transparent"/>
+                            <Ellipse x:Name="RightRawDot"
+                                     Width="12" Height="12"
+                                     Fill="#CC4455" Opacity="0.8"/>
+                            <Ellipse x:Name="RightCorrectedDot"
+                                     Width="14" Height="14"
+                                     Fill="#00D4FF"/>
+                            <Line x:Name="RightCenterH"
+                                  Stroke="#00D4FF44" StrokeThickness="0.5"/>
+                            <Line x:Name="RightCenterV"
+                                  Stroke="#00D4FF44" StrokeThickness="0.5"/>
+                        </Canvas>
+                    </Border>
+                </Grid>
+
+                <!-- Stick value readouts -->
+                <Grid Grid.Row="2" Margin="0,10,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0" HorizontalAlignment="Center">
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                            <Ellipse Width="8" Height="8" Fill="#CC4455"
+                                     Margin="0,0,4,0" VerticalAlignment="Center"/>
+                            <TextBlock Text="RAW  " Foreground="{StaticResource SubtextBrush}"
+                                       FontSize="10" VerticalAlignment="Center"/>
+                            <TextBlock x:Name="LblLeftRaw"
+                                       Text="0.000, 0.000"
+                                       Foreground="#CC4455"
+                                       FontFamily="Consolas" FontSize="11"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center"
+                                    Margin="0,4,0,0">
+                            <Ellipse Width="8" Height="8" Fill="{StaticResource AccentBrush}"
+                                     Margin="0,0,4,0" VerticalAlignment="Center"/>
+                            <TextBlock Text="OUT  " Foreground="{StaticResource SubtextBrush}"
+                                       FontSize="10" VerticalAlignment="Center"/>
+                            <TextBlock x:Name="LblLeftOut"
+                                       Text="0.000, 0.000"
+                                       Foreground="{StaticResource AccentBrush}"
+                                       FontFamily="Consolas" FontSize="11"/>
+                        </StackPanel>
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="1" HorizontalAlignment="Center">
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                            <Ellipse Width="8" Height="8" Fill="#CC4455"
+                                     Margin="0,0,4,0" VerticalAlignment="Center"/>
+                            <TextBlock Text="RAW  " Foreground="{StaticResource SubtextBrush}"
+                                       FontSize="10" VerticalAlignment="Center"/>
+                            <TextBlock x:Name="LblRightRaw"
+                                       Text="0.000, 0.000"
+                                       Foreground="#CC4455"
+                                       FontFamily="Consolas" FontSize="11"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center"
+                                    Margin="0,4,0,0">
+                            <Ellipse Width="8" Height="8" Fill="{StaticResource AccentBrush}"
+                                     Margin="0,0,4,0" VerticalAlignment="Center"/>
+                            <TextBlock Text="OUT  " Foreground="{StaticResource SubtextBrush}"
+                                       FontSize="10" VerticalAlignment="Center"/>
+                            <TextBlock x:Name="LblRightOut"
+                                       Text="0.000, 0.000"
+                                       Foreground="{StaticResource AccentBrush}"
+                                       FontFamily="Consolas" FontSize="11"/>
+                        </StackPanel>
+                    </StackPanel>
+                </Grid>
+            </Grid>
+
+            <!-- ── RIGHT PANEL: Settings ──────────────────────────────── -->
+            <StackPanel Grid.Column="2" VerticalAlignment="Top">
+
+                <Border Style="{StaticResource Card}" Margin="0,0,0,10">
+                    <StackPanel>
+                        <TextBlock Text="CORRECTION SETTINGS"
+                                   Style="{StaticResource SectionLabel}"
+                                   Margin="0,0,0,14"/>
+
+                        <!-- Deadzone -->
+                        <TextBlock Text="DEADZONE RADIUS"
+                                   Style="{StaticResource SectionLabel}"
+                                   Margin="0,0,0,4"/>
+                        <Grid Margin="0,0,0,14">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="40"/>
+                            </Grid.ColumnDefinitions>
+                            <Slider x:Name="SliderDeadzone"
+                                    Grid.Column="0"
+                                    Minimum="0" Maximum="0.30"
+                                    Value="0.08" TickFrequency="0.01"
+                                    IsSnapToTickEnabled="True"
+                                    VerticalAlignment="Center"
+                                    ValueChanged="SliderDeadzone_ValueChanged"/>
+                            <TextBlock x:Name="LblDeadzoneVal" Grid.Column="1"
+                                       Text="0.08" Style="{StaticResource AccentValue}"
+                                       HorizontalAlignment="Right"
+                                       VerticalAlignment="Center"/>
+                        </Grid>
+
+                        <!-- Hysteresis -->
+                        <TextBlock Text="HYSTERESIS BAND"
+                                   Style="{StaticResource SectionLabel}"
+                                   Margin="0,0,0,4"/>
+                        <Grid Margin="0,0,0,14">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="40"/>
+                            </Grid.ColumnDefinitions>
+                            <Slider x:Name="SliderHysteresis"
+                                    Grid.Column="0"
+                                    Minimum="0" Maximum="0.10"
+                                    Value="0.025" TickFrequency="0.005"
+                                    IsSnapToTickEnabled="True"
+                                    VerticalAlignment="Center"
+                                    ValueChanged="SliderHysteresis_ValueChanged"/>
+                            <TextBlock x:Name="LblHysteresisVal" Grid.Column="1"
+                                       Text="0.025" Style="{StaticResource AccentValue}"
+                                       HorizontalAlignment="Right"
+                                       VerticalAlignment="Center"/>
+                        </Grid>
+
+                        <!-- Smoothing -->
+                        <TextBlock Text="SMOOTHING"
+                                   Style="{StaticResource SectionLabel}"
+                                   Margin="0,0,0,4"/>
+                        <Grid Margin="0,0,0,14">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="40"/>
+                            </Grid.ColumnDefinitions>
+                            <Slider x:Name="SliderSmoothing"
+                                    Grid.Column="0"
+                                    Minimum="0" Maximum="0.90"
+                                    Value="0.30" TickFrequency="0.05"
+                                    IsSnapToTickEnabled="True"
+                                    VerticalAlignment="Center"
+                                    ValueChanged="SliderSmoothing_ValueChanged"/>
+                            <TextBlock x:Name="LblSmoothingVal" Grid.Column="1"
+                                       Text="0.30" Style="{StaticResource AccentValue}"
+                                       HorizontalAlignment="Right"
+                                       VerticalAlignment="Center"/>
+                        </Grid>
+
+                        <!-- Learning Rate -->
+                        <TextBlock Text="LEARNING RATE"
+                                   Style="{StaticResource SectionLabel}"
+                                   Margin="0,0,0,4"/>
+                        <Grid Margin="0,0,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="40"/>
+                            </Grid.ColumnDefinitions>
+                            <Slider x:Name="SliderLearning"
+                                    Grid.Column="0"
+                                    Minimum="0.0001" Maximum="0.005"
+                                    Value="0.0008" TickFrequency="0.0001"
+                                    IsSnapToTickEnabled="True"
+                                    VerticalAlignment="Center"
+                                    ValueChanged="SliderLearning_ValueChanged"/>
+                            <TextBlock x:Name="LblLearningVal" Grid.Column="1"
+                                       Text="0.0008" Style="{StaticResource AccentValue}"
+                                       HorizontalAlignment="Right"
+                                       VerticalAlignment="Center"
+                                       FontSize="10"/>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+                <!-- Spike suppression settings -->
+                <Border Style="{StaticResource Card}" Margin="0,0,0,10">
+                    <StackPanel>
+                        <TextBlock Text="SPIKE SUPPRESSION"
+                                   Style="{StaticResource SectionLabel}"
+                                   Margin="0,0,0,14"/>
+
+                        <TextBlock Text="SPIKE THRESHOLD"
+                                   Style="{StaticResource SectionLabel}"
+                                   Margin="0,0,0,4"/>
+                        <Grid Margin="0,0,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="40"/>
+                            </Grid.ColumnDefinitions>
+                            <Slider x:Name="SliderSpike"
+                                    Grid.Column="0"
+                                    Minimum="0.10" Maximum="0.80"
+                                    Value="0.35" TickFrequency="0.05"
+                                    IsSnapToTickEnabled="True"
+                                    VerticalAlignment="Center"
+                                    ValueChanged="SliderSpike_ValueChanged"/>
+                            <TextBlock x:Name="LblSpikeVal" Grid.Column="1"
+                                       Text="0.35" Style="{StaticResource AccentValue}"
+                                       HorizontalAlignment="Right"
+                                       VerticalAlignment="Center"/>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+                <!-- Trigger readout -->
+                <Border Style="{StaticResource Card}">
+                    <StackPanel>
+                        <TextBlock Text="TRIGGERS" Style="{StaticResource SectionLabel}"
+                                   Margin="0,0,0,12"/>
+                        <Grid Margin="0,0,0,8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="LEFT"
+                                       Style="{StaticResource SectionLabel}"
+                                       VerticalAlignment="Center"/>
+                            <TextBlock x:Name="LblLT" Grid.Column="1"
+                                       Text="0.00" Style="{StaticResource ValueLabel}"
+                                       FontFamily="Consolas" FontSize="11"/>
+                        </Grid>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="RIGHT"
+                                       Style="{StaticResource SectionLabel}"
+                                       VerticalAlignment="Center"/>
+                            <TextBlock x:Name="LblRT" Grid.Column="1"
+                                       Text="0.00" Style="{StaticResource ValueLabel}"
+                                       FontFamily="Consolas" FontSize="11"/>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </Grid>
+
+        <!-- ════════════════════════════════════════════════════════════
+             STATUS BAR
+        ════════════════════════════════════════════════════════════ -->
+        <Grid Grid.Row="2" Background="{StaticResource SurfaceBrush}">
+            <Rectangle Height="1" VerticalAlignment="Top"
+                       Fill="{StaticResource BorderBrush}"/>
+            <StackPanel Orientation="Horizontal"
+                        VerticalAlignment="Center" Margin="12,0,0,0">
+                <TextBlock x:Name="LblPollRate"
+                           Text="Poll: — Hz"
+                           Foreground="{StaticResource SubtextBrush}"
+                           FontSize="10" Margin="0,0,20,0"/>
+                <TextBlock x:Name="LblPacket"
+                           Text="Packet: —"
+                           Foreground="{StaticResource SubtextBrush}"
+                           FontSize="10" Margin="0,0,20,0"/>
+                <TextBlock x:Name="LblSpikeCount"
+                           Text="Spikes suppressed: 0"
+                           Foreground="{StaticResource SubtextBrush}"
+                           FontSize="10" Margin="0,0,20,0"/>
+                <TextBlock x:Name="LblCorrectionMode"
+                           Text="Mode: ENABLED"
+                           Foreground="{StaticResource GreenBrush}"
+                           FontSize="10" FontWeight="SemiBold"/>
+            </StackPanel>
+
+            <!-- ViGEm warning if not installed -->
+            <TextBlock x:Name="LblVigemWarning"
+                       Text="⚠  ViGEmBus not installed — virtual output disabled"
+                       Foreground="{StaticResource AmberBrush}"
+                       FontSize="10"
+                       HorizontalAlignment="Right"
+                       VerticalAlignment="Center"
+                       Margin="0,0,12,0"
+                       Visibility="Collapsed"/>
+        </Grid>
+    </Grid>
+</Window>
