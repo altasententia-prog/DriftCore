@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DriftCore — Your Controller Is Lying To You.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@300;400;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cyan: #00e5ff;
+    --pink: #ff2d78;
+    --cyan-dim: #007a8a;
+    --pink-dim: #8a0038;
+    --metal: #2a2e33;
+    --white: #d8dee8;
+    --grey: #7a8490;
+    --dark: #060608;
+    --panel: #0c0d12;
+    --border: #1e2430;
+    --glow-cyan: 0 0 28px rgba(0,229,255,0.45);
+    --glow-pink: 0 0 28px rgba(0,229,255,0.4);
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { background: var(--dark); color: var(--white); font-family: 'Barlow Condensed', sans-serif; overflow-x: hidden; cursor: crosshair; }
+  body::before { content:''; position:fixed; inset:0; background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E"); pointer-events:none; z-index:999; opacity:0.5; }
+  body::after { content:''; position:fixed; inset:0; background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.07) 2px,rgba(0,0,0,0.07) 4px); pointer-events:none; z-index:998; }
+
+  /* NAV */
+  nav { position:fixed; top:0; left:0; right:0; z-index:200; display:flex; align-items:center; justify-content:space-between; padding:20px 48px; background:linear-gradient(to bottom,rgba(8,8,8,0.96),transparent); backdrop-filter:blur(2px); }
+  .nav-logo { font-family:'Bebas Neue',sans-serif; font-size:1.6rem; letter-spacing:0.12em; color:var(--white); text-decoration:none; }
+  .nav-logo span { color:var(--pink); }
+  .nav-links { display:flex; gap:32px; list-style:none; }
+  .nav-links a { font-family:'Share Tech Mono',monospace; font-size:0.68rem; letter-spacing:0.15em; color:var(--grey); text-decoration:none; text-transform:uppercase; transition:color 0.2s; }
+  .nav-links a:hover { color:var(--cyan); }
+
+  /* PC BADGE */
+  .pc-badge { display:inline-flex; align-items:center; gap:7px; font-family:'Share Tech Mono',monospace; font-size:0.64rem; letter-spacing:0.16em; text-transform:uppercase; color:var(--white); background:rgba(255,255,255,0.04); border:1px solid var(--border); padding:6px 12px; }
+  .pc-badge::before { content:''; display:inline-block; width:6px; height:6px; border-radius:50%; background:var(--cyan); box-shadow:0 0 8px var(--cyan); animation:blink 2s ease-in-out infinite; }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+  /* HERO */
+  #hero { position:relative; min-height:100vh; display:flex; flex-direction:column; justify-content:center; padding:140px 48px 80px; overflow:hidden; }
+  #hero::before { content:''; position:absolute; top:-10%; right:-5%; width:55%; height:130%; background:linear-gradient(135deg,transparent 30%,rgba(0,229,255,0.03) 30%,rgba(0,229,255,0.06) 60%,transparent 60%); transform:skewX(-6deg); pointer-events:none; }
+  .hero-accent-line { position:absolute; top:0; bottom:0; left:46%; width:1px; background:linear-gradient(to bottom,transparent,var(--cyan) 20%,var(--cyan) 60%,rgba(255,45,120,0.4) 90%,transparent); opacity:0.25; }
+  .hero-bg-text { position:absolute; bottom:-2%; right:-2%; font-family:'Bebas Neue',sans-serif; font-size:clamp(120px,18vw,280px); color:rgba(0,229,255,0.025); pointer-events:none; line-height:1; user-select:none; }
+  .hero-top-row { display:flex; align-items:center; gap:14px; margin-bottom:22px; animation:fadeSlideUp 0.6s ease both; flex-wrap:wrap; }
+  .hero-tag { font-family:'Share Tech Mono',monospace; font-size:0.7rem; letter-spacing:0.3em; color:var(--cyan); text-transform:uppercase; display:flex; align-items:center; gap:12px; }
+  .hero-tag::before { content:''; display:block; width:32px; height:1px; background:var(--cyan); }
+  h1 { font-family:'Bebas Neue',sans-serif; font-size:clamp(72px,11vw,160px); line-height:0.92; letter-spacing:0.02em; max-width:700px; animation:fadeSlideUp 0.7s 0.1s ease both; }
+  h1 .line-accent { color:var(--cyan); display:block; }
+  .hero-sub { margin-top:28px; font-size:1.15rem; font-weight:300; letter-spacing:0.05em; color:var(--grey); max-width:480px; line-height:1.6; animation:fadeSlideUp 0.7s 0.2s ease both; }
+  .hero-sub strong { color:var(--white); font-weight:600; }
+  .hero-cta-row { display:flex; align-items:center; gap:24px; margin-top:44px; flex-wrap:wrap; animation:fadeSlideUp 0.7s 0.3s ease both; }
+  .btn-primary { display:inline-flex; align-items:center; gap:10px; background:var(--pink); color:var(--cyan); font-family:'Bebas Neue',sans-serif; font-size:1.1rem; letter-spacing:0.12em; padding:14px 36px; border:none; cursor:pointer; text-decoration:none; clip-path:polygon(0 0,calc(100% - 12px) 0,100% 12px,100% 100%,12px 100%,0 calc(100% - 12px)); transition:background 0.2s,box-shadow 0.2s,transform 0.15s; position:relative; overflow:hidden; }
+  .btn-primary::after { content:''; position:absolute; inset:0; background:linear-gradient(135deg,rgba(255,255,255,0.1) 0%,transparent 60%); pointer-events:none; }
+  .btn-primary:hover { background:#ff5599; box-shadow:var(--glow-cyan); transform:translateY(-2px); }
+  .btn-secondary { font-family:'Share Tech Mono',monospace; font-size:0.75rem; letter-spacing:0.15em; color:var(--grey); text-decoration:none; text-transform:uppercase; display:flex; align-items:center; gap:8px; transition:color 0.2s; }
+  .btn-secondary:hover { color:var(--white); }
+  .btn-secondary::before { content:''; display:block; width:20px; height:1px; background:currentColor; transition:width 0.2s; }
+  .btn-secondary:hover::before { width:32px; }
+  .stats-bar { margin-top:64px; display:flex; gap:0; border-top:1px solid var(--border); border-bottom:1px solid var(--border); animation:fadeSlideUp 0.7s 0.4s ease both; max-width:560px; }
+  .stat { flex:1; padding:20px 0; border-right:1px solid var(--border); display:flex; flex-direction:column; gap:4px; }
+  .stat:last-child { border-right:none; }
+  .stat-val { font-family:'Bebas Neue',sans-serif; font-size:1.8rem; color:var(--cyan); letter-spacing:0.05em; line-height:1; }
+  .stat-label { font-family:'Share Tech Mono',monospace; font-size:0.6rem; letter-spacing:0.18em; color:var(--grey); text-transform:uppercase; }
+  .controller-viz { position:absolute; right:6%; top:50%; transform:translateY(-50%); width:380px; animation:floatAnim 4s ease-in-out infinite, fadeSlideUp 0.9s 0.3s ease both; pointer-events:none; }
+  @keyframes floatAnim { 0%,100%{transform:translateY(-50%) translateY(0)} 50%{transform:translateY(-50%) translateY(-14px)} }
+
+  /* SECTIONS */
+  section { padding:100px 48px; position:relative; }
+  .section-label { font-family:'Share Tech Mono',monospace; font-size:0.68rem; letter-spacing:0.3em; color:var(--cyan); text-transform:uppercase; margin-bottom:14px; display:flex; align-items:center; gap:10px; }
+  .section-label::after { content:''; flex:1; max-width:60px; height:1px; background:var(--cyan); opacity:0.5; }
+  .section-title { font-family:'Bebas Neue',sans-serif; font-size:clamp(40px,6vw,80px); letter-spacing:0.04em; line-height:1; }
+
+  /* PROBLEM */
+  #problem { background:var(--panel); border-top:1px solid var(--border); border-bottom:1px solid var(--border); }
+  #problem .inner { max-width:1100px; margin:0 auto; display:grid; grid-template-columns:1fr 1fr; gap:80px; align-items:center; }
+  .drift-visual { position:relative; height:280px; display:flex; align-items:center; justify-content:center; }
+  .drift-circle { position:absolute; border-radius:50%; border:1px solid; animation:pulse-ring 2.5s ease-in-out infinite; }
+  .drift-circle:nth-child(1){width:80px;height:80px;border-color:var(--cyan);animation-delay:0s}
+  .drift-circle:nth-child(2){width:140px;height:140px;border-color:rgba(0,229,255,0.35);animation-delay:0.3s}
+  .drift-circle:nth-child(3){width:200px;height:200px;border-color:rgba(0,229,255,0.15);animation-delay:0.6s}
+  .drift-circle:nth-child(4){width:260px;height:260px;border-color:rgba(0,229,255,0.06);animation-delay:0.9s}
+  .drift-dot { width:12px;height:12px;border-radius:50%;background:var(--pink);box-shadow:0 0 20px var(--cyan),0 0 40px rgba(0,229,255,0.4);position:absolute;top:calc(50% - 18px);left:calc(50% + 22px);animation:driftWobble 1.8s ease-in-out infinite; }
+  .drift-center { width:8px;height:8px;border-radius:50%;background:#fff;position:absolute;opacity:0.4; }
+  @keyframes driftWobble { 0%,100%{transform:translate(0,0)} 25%{transform:translate(6px,-8px)} 50%{transform:translate(-4px,4px)} 75%{transform:translate(8px,6px)} }
+  @keyframes pulse-ring { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(1.03)} }
+  .problem-text p { font-size:1.05rem;line-height:1.75;color:var(--grey);margin-top:16px;font-weight:300; }
+  .problem-text p strong { color:var(--white); }
+
+  /* FEATURES */
+  #features .inner { max-width:1100px; margin:0 auto; }
+  .pc-notice { margin-top:20px; display:inline-flex; align-items:center; gap:10px; font-family:'Share Tech Mono',monospace; font-size:0.68rem; letter-spacing:0.13em; text-transform:uppercase; color:var(--grey); border:1px solid var(--border); padding:10px 18px; }
+  .features-grid { display:grid;grid-template-columns:repeat(3,1fr);gap:2px;margin-top:48px;background:var(--border); }
+  .feature-card { background:var(--panel);padding:40px 32px;position:relative;overflow:hidden;transition:background 0.25s; }
+  .feature-card::before { content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--cyan);transform:scaleX(0);transform-origin:left;transition:transform 0.35s ease; }
+  .feature-card:hover { background:#121212; }
+  .feature-card:hover::before { transform:scaleX(1); }
+  .feature-icon { font-size:1.8rem;margin-bottom:20px;display:block; }
+  .feature-card h3 { font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:0.08em;margin-bottom:10px; }
+  .feature-card p { font-size:0.9rem;color:var(--grey);line-height:1.65;font-weight:300; }
+  .feature-tag { display:inline-block;margin-top:16px;font-family:'Share Tech Mono',monospace;font-size:0.62rem;letter-spacing:0.15em;color:var(--cyan);background:rgba(0,229,255,0.07);padding:4px 10px;border:1px solid rgba(0,229,255,0.2); }
+
+  /* SETUP GUIDE */
+  #how { background:var(--panel);border-top:1px solid var(--border);border-bottom:1px solid var(--border); }
+  #how .inner { max-width:900px;margin:0 auto; }
+  .steps { margin-top:56px;display:flex;flex-direction:column; }
+  .step { display:grid;grid-template-columns:80px 1fr;gap:32px;align-items:start;padding:36px 0;border-bottom:1px solid var(--border); }
+  .step:last-child { border-bottom:none; }
+  .step-num { font-family:'Bebas Neue',sans-serif;font-size:3.5rem;color:var(--border);line-height:1;transition:color 0.3s; }
+  .step:hover .step-num { color:var(--cyan-dim); }
+  .step-content h3 { font-family:'Bebas Neue',sans-serif;font-size:1.5rem;letter-spacing:0.06em;margin-bottom:8px; }
+  .step-content p { font-size:0.92rem;color:var(--grey);line-height:1.65;font-weight:300;max-width:580px; }
+  .step-content p strong { color:var(--white); }
+  .step-mono { margin-top:12px;font-family:'Share Tech Mono',monospace;font-size:0.7rem;color:var(--cyan);letter-spacing:0.06em;background:rgba(0,229,255,0.05);border:1px solid rgba(0,229,255,0.15);padding:8px 14px;display:inline-block; }
+  .step-tip { margin-top:10px;font-family:'Share Tech Mono',monospace;font-size:0.66rem;letter-spacing:0.06em;color:#555;display:flex;align-items:flex-start;gap:8px;max-width:580px; }
+  .step-tip::before { content:'//';color:var(--cyan-dim);flex-shrink:0; }
+
+  /* DEMO SLIDERS */
+  #demo { padding:100px 48px; }
+  #demo .inner { max-width:900px;margin:0 auto; }
+  .slider-grid { display:grid;grid-template-columns:1fr 1fr;gap:36px 56px;margin-top:52px; }
+  .slider-row { display:flex;flex-direction:column;gap:12px; }
+  .slider-header { display:flex;justify-content:space-between;align-items:baseline; }
+  .slider-label { font-family:'Share Tech Mono',monospace;font-size:0.7rem;letter-spacing:0.18em;color:var(--grey);text-transform:uppercase; }
+  .slider-val { font-family:'Bebas Neue',sans-serif;font-size:1.4rem;color:var(--cyan);letter-spacing:0.06em;min-width:3.5ch;text-align:right; }
+  .slider-track { position:relative;height:6px;background:#181818;border:1px solid var(--border);cursor:pointer;user-select:none;touch-action:none; }
+  .slider-fill { position:absolute;top:0;left:0;height:100%;background:linear-gradient(90deg, var(--cyan), rgba(0,229,255,0.5));pointer-events:none; }
+  .slider-thumb { position:absolute;top:50%;width:18px;height:18px;background:var(--dark);border:2px solid var(--cyan);border-radius:50%;transform:translate(-50%,-50%);cursor:grab;touch-action:none;transition:box-shadow 0.15s; }
+  .slider-thumb:hover,.slider-thumb.active { box-shadow:0 0 0 5px rgba(0,229,255,0.2); }
+  .slider-thumb.active { cursor:grabbing; }
+
+  /* WAITLIST */
+  #waitlist { text-align:center;padding:120px 48px;position:relative;overflow:hidden; }
+  #waitlist::before { content:'EARLY ACCESS';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-family:'Bebas Neue',sans-serif;font-size:clamp(80px,16vw,240px);color:rgba(0,229,255,0.025);white-space:nowrap;pointer-events:none;letter-spacing:0.05em; }
+  #waitlist .section-title { font-size:clamp(44px,7vw,90px); }
+  .waitlist-sub { margin-top:16px;font-size:1rem;color:var(--grey);letter-spacing:0.05em;font-weight:300; }
+  .waitlist-form { margin:48px auto 0;display:flex;max-width:520px;position:relative;z-index:2; }
+  .waitlist-form input { flex:1;background:#111;border:1px solid var(--border);border-right:none;color:var(--white);font-family:'Share Tech Mono',monospace;font-size:0.82rem;letter-spacing:0.08em;padding:16px 20px;outline:none;transition:border-color 0.2s; }
+  .waitlist-form input::placeholder { color:#444; }
+  .waitlist-form input:focus { border-color:var(--cyan-dim); }
+  .waitlist-form button { background:var(--pink);color:var(--cyan);font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:0.12em;padding:16px 30px;border:none;cursor:pointer;transition:background 0.2s,box-shadow 0.2s;white-space:nowrap; }
+  .waitlist-form button:hover { background:#00ffff;box-shadow:var(--glow-pink); }
+  .waitlist-note { margin-top:14px;font-family:'Share Tech Mono',monospace;font-size:0.65rem;letter-spacing:0.15em;color:#444;text-transform:uppercase; }
+  .success-msg { display:none;margin:20px auto 0;max-width:460px;font-family:'Share Tech Mono',monospace;font-size:0.8rem;letter-spacing:0.1em;color:var(--cyan);border:1px solid rgba(0,229,255,0.3);padding:14px 24px;background:rgba(0,229,255,0.05);position:relative;z-index:2; }
+
+  /* FOOTER */
+  footer { border-top:1px solid var(--border);padding:32px 48px;display:flex;align-items:center;justify-content:space-between; }
+  .footer-logo { font-family:'Bebas Neue',sans-serif;font-size:1.2rem;letter-spacing:0.12em; }
+  .footer-logo span { color:var(--pink); }
+  .footer-note { font-family:'Share Tech Mono',monospace;font-size:0.62rem;letter-spacing:0.15em;color:#232a35;text-transform:uppercase; }
+
+  /* ANIMS */
+  @keyframes fadeSlideUp { from{opacity:0;transform:translateY(24px)} to{opacity:1;transform:translateY(0)} }
+  .reveal { opacity:0;transform:translateY(30px);transition:opacity 0.7s ease,transform 0.7s ease; }
+  .reveal.visible { opacity:1;transform:none; }
+  .cursor-glow { position:fixed;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,rgba(0,229,255,0.05) 0%,transparent 70%);pointer-events:none;z-index:997;transform:translate(-50%,-50%);transition:left 0.08s ease,top 0.08s ease; }
+
+  @media(max-width:900px){
+    nav{padding:16px 24px} .nav-links{display:none}
+    section{padding:72px 24px} #hero{padding:120px 24px 60px}
+    h1{font-size:clamp(56px,14vw,100px)} .controller-viz{display:none}
+    #problem .inner{grid-template-columns:1fr;gap:40px}
+    .features-grid{grid-template-columns:1fr} .slider-grid{grid-template-columns:1fr}
+    footer{flex-direction:column;gap:12px;text-align:center}
+    .waitlist-form{flex-direction:column}
+    .waitlist-form input{border-right:1px solid var(--border);border-bottom:none}
+  }
+</style>
+</head>
+<body>
+
+<div class="cursor-glow" id="cursorGlow"></div>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="nav-logo">Drift<span style="color:var(--pink)">Core</span></a>
+  <ul class="nav-links">
+    <li><a href="#problem">Problem</a></li>
+    <li><a href="#features">Features</a></li>
+    <li><a href="#how">Setup Guide</a></li>
+    <li><a href="#demo">Demo</a></li>
+    <li><a href="#waitlist">Early Access</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-accent-line"></div>
+  <div class="hero-bg-text">DRIFT</div>
+  <div class="hero-top-row">
+    <div class="hero-tag">v0.9 Beta — Open Beta</div>
+    <div class="pc-badge">Windows PC Only</div>
+  </div>
+  <h1>Your Stick<br><span class="line-accent">Needs Therapy.</span></h1>
+  <p class="hero-sub"><strong>DriftCore</strong> corrects Xbox controller analog stick drift in real-time — no hardware mods, no recalibration loops. Just clean input, every game.</p>
+  <div class="hero-cta-row">
+    <a href="#waitlist" class="btn-primary">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 0L9 5H14L10 8.5L11.5 14L7 10.5L2.5 14L4 8.5L0 5H5L7 0Z" fill="white"/></svg>
+      Get Early Access
+    </a>
+    <a href="#how" class="btn-secondary">Setup Guide</a>
+  </div>
+  <div class="stats-bar">
+    <div class="stat"><span class="stat-val" style="color:var(--cyan)">&lt;1ms</span><span class="stat-label">Barely There</span></div>
+    <div class="stat"><span class="stat-val" style="color:var(--cyan)">0%</span><span class="stat-label">Drift: Gone</span></div>
+    <div class="stat"><span class="stat-val" style="color:var(--cyan)">XInput</span><span class="stat-label">Proper Job</span></div>
+    <div class="stat"><span class="stat-val" style="color:var(--cyan)">Free</span><span class="stat-label">Not A Scam</span></div>
+  </div>
+
+  <!-- DriftCore mascot logo -->
+  <img
+    src="driftcore-logo.png"
+    alt="DriftCore mascot"
+    style="position:absolute;right:4%;top:50%;transform:translateY(-50%);width:340px;
+           filter:drop-shadow(0 0 32px rgba(0,229,255,0.25)) drop-shadow(0 0 40px rgba(255,45,120,0.06));
+           animation:floatAnim 4s ease-in-out infinite, fadeSlideUp 0.9s 0.3s ease both;
+           pointer-events:none;"
+    class="controller-viz"
+  />
+</section>
+
+<!-- PROBLEM -->
+<section id="problem">
+  <div class="inner">
+    <div class="drift-visual">
+      <div class="drift-circle"></div><div class="drift-circle"></div>
+      <div class="drift-circle"></div><div class="drift-circle"></div>
+      <div class="drift-dot"></div><div class="drift-center"></div>
+    </div>
+    <div class="problem-text reveal">
+      <div class="section-label">The Problem</div>
+      <h2 class="section-title">Your Input Is Lying To You</h2>
+      <p>Stick drift sends a constant, low-level signal to your game even when your thumbs are <strong>completely still</strong>. It's the potentiometers wearing down — every controller does it eventually.</p>
+      <p style="margin-top:14px">The industry answer is "buy a new one." <strong>DriftCore's answer is software.</strong> We intercept the raw XInput data, apply a precision dead-zone filter via ViGEmBus, and feed clean virtual input back to your game — transparently, instantly.</p>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section id="features">
+  <div class="inner">
+    <div class="reveal">
+      <div class="section-label">Capabilities</div>
+      <h2 class="section-title">Built Different</h2>
+      <div class="pc-notice">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="flex-shrink:0"><rect x="1" y="1" width="12" height="9" rx="1" stroke="#9a9898" stroke-width="1"/><rect x="5" y="10" width="4" height="1.5" fill="#9a9898"/><rect x="3.5" y="11.5" width="7" height="1" fill="#9a9898"/></svg>
+        Currently Windows 10 / 11 x64 only &nbsp;·&nbsp; Xbox XInput controllers &nbsp;·&nbsp; Console &amp; Mac support on the roadmap
+      </div>
+    </div>
+    <div class="features-grid reveal">
+      <div class="feature-card">
+        <span class="feature-icon">⚡</span>
+        <h3>Real-Time Correction</h3>
+        <p>Intercepts raw XInput polling at the API level. Correction happens before your game ever sees the data — zero gameplay impact.</p>
+        <span class="feature-tag">XInput Hook</span>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">🎯</span>
+        <h3>Per-Axis Dead Zone</h3>
+        <p>Set independent thresholds for LX, LY, RX, RY. Fine-tune around your controller's specific wear pattern with live preview.</p>
+        <span class="feature-tag">4-Axis Control</span>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">🔌</span>
+        <h3>ViGEmBus Virtual Controller</h3>
+        <p>Outputs a clean virtual Xbox controller. Your game sees it as real hardware — no driver conflicts, no whitelist issues.</p>
+        <span class="feature-tag" style="color:var(--cyan);background:rgba(0,229,255,0.07);border-color:rgba(0,229,255,0.25)">ViGEmBus</span>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">📊</span>
+        <h3>Live Stick Visualiser</h3>
+        <p>See raw vs corrected input on a real-time scope. Watch the drift disappear as you dial in your threshold.</p>
+        <span class="feature-tag">Real-Time</span>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">💾</span>
+        <h3>Profile Presets</h3>
+        <p>Save dead-zone configs per controller or per game. Switch profiles instantly without reopening the app.</p>
+        <span class="feature-tag" style="color:var(--cyan);background:rgba(0,229,255,0.07);border-color:rgba(0,229,255,0.25)">Multi-Profile</span>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">🧩</span>
+        <h3>System Tray Mode</h3>
+        <p>Runs silently in the background. Starts with Windows, stays out of your way, auto-detects controller plug-in.</p>
+        <span class="feature-tag">Background</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SETUP GUIDE -->
+<section id="how">
+  <div class="inner">
+    <div class="reveal">
+      <div class="section-label">Setup Guide</div>
+      <h2 class="section-title">Up &amp; Running In Minutes</h2>
+    </div>
+    <div class="steps reveal">
+      <div class="step">
+        <div class="step-num">01</div>
+        <div class="step-content">
+          <h3>Install ViGEmBus Driver</h3>
+          <p>DriftCore requires the ViGEmBus virtual controller driver to create a clean output device. Download it from the official GitHub release and run the installer — takes under 60 seconds and only needs to be done once.</p>
+          <div class="step-mono">ViGEmBus_Setup.exe → Run as Administrator → Restart recommended</div>
+          <p class="step-tip">A reboot after install ensures the driver loads correctly before you launch DriftCore.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">02</div>
+        <div class="step-content">
+          <h3>Connect Your Xbox Controller</h3>
+          <p>Plug in via USB or connect wirelessly. DriftCore works with any Xbox controller recognised by Windows using the XInput protocol — Xbox One, Xbox Series, or compatible third-party pads.</p>
+          <div class="step-mono">Settings → Bluetooth &amp; Devices → confirm controller is detected</div>
+          <p class="step-tip">If Windows doesn't see your controller, verify it works in a game first before launching DriftCore.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">03</div>
+        <div class="step-content">
+          <h3>Launch DriftCore</h3>
+          <p>Run <strong>DriftCore.exe</strong> — no installation required, it's a standalone executable. Right-click and select <strong>Run as Administrator</strong> on first launch to allow XInput hooking.</p>
+          <div class="step-mono">DriftCore.exe → Right-click → Run as Administrator</div>
+          <p class="step-tip">XInput hooks can trigger antivirus false positives. Whitelist DriftCore.exe in Windows Defender if prompted.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">04</div>
+        <div class="step-content">
+          <h3>Select Your Controller</h3>
+          <p>DriftCore lists all connected XInput devices. Select the drifting controller from the dropdown. The live stick visualiser immediately shows raw input — including the drift signal — in real time.</p>
+          <div class="step-mono">Controller dropdown → Select device → Live view activates</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">05</div>
+        <div class="step-content">
+          <h3>Dial In Your Dead Zone</h3>
+          <p>Use the per-axis sliders to set a dead zone threshold for each stick axis (LX, LY, RX, RY). Start at around 8% and increase until the drift signal disappears from the visualiser. Set it just above the noise floor — too high and you'll lose stick sensitivity near centre.</p>
+          <div class="step-mono">Recommended starting range: 8–12% on drifting axes</div>
+          <p class="step-tip">Watch the corrected output in the visualiser. When it holds flat at rest with no thumb on the stick, you're dialled in.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">06</div>
+        <div class="step-content">
+          <h3>Enable Output &amp; Play</h3>
+          <p>Hit <strong>Enable</strong> to activate the virtual controller. Launch your game — it sees the clean ViGEmBus virtual device instead of your drifting physical controller. No further config needed in-game.</p>
+          <div class="step-mono">Enable → Launch game → Select controller in game input settings if prompted</div>
+          <p class="step-tip">Some games require you to manually select the controller. Look for "Xbox Controller 2" or a ViGEm device in the game's input device list.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">07</div>
+        <div class="step-content">
+          <h3>Save Your Profile</h3>
+          <p>Once dialled in, save your settings as a named profile. Enable the <strong>Start with Windows</strong> option in Settings and DriftCore will auto-load your profile whenever your controller is plugged in — completely hands-free going forward.</p>
+          <div class="step-mono">File → Save Profile → Settings → Enable "Start with Windows"</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DEMO -->
+<section id="demo">
+  <div class="inner">
+    <div class="reveal">
+      <div class="section-label">Interactive Demo</div>
+      <h2 class="section-title">Try The Dead Zone Controls</h2>
+      <p style="margin-top:16px;font-size:0.95rem;color:var(--grey);font-weight:300;max-width:560px;">Drag the sliders to see how per-axis dead zone thresholds work. This is a live preview of the controls inside DriftCore.</p>
+    </div>
+    <div class="slider-grid reveal">
+
+      <div class="slider-row">
+        <div class="slider-header">
+          <span class="slider-label">Left Stick X (LX)</span>
+          <span class="slider-val" id="val-lx">12%</span>
+        </div>
+        <div class="slider-track" id="track-lx">
+          <div class="slider-fill" id="fill-lx"></div>
+          <div class="slider-thumb" id="thumb-lx"></div>
+        </div>
+      </div>
+
+      <div class="slider-row">
+        <div class="slider-header">
+          <span class="slider-label">Left Stick Y (LY)</span>
+          <span class="slider-val" id="val-ly">8%</span>
+        </div>
+        <div class="slider-track" id="track-ly">
+          <div class="slider-fill" id="fill-ly"></div>
+          <div class="slider-thumb" id="thumb-ly"></div>
+        </div>
+      </div>
+
+      <div class="slider-row">
+        <div class="slider-header">
+          <span class="slider-label">Right Stick X (RX)</span>
+          <span class="slider-val" id="val-rx">5%</span>
+        </div>
+        <div class="slider-track" id="track-rx">
+          <div class="slider-fill" id="fill-rx"></div>
+          <div class="slider-thumb" id="thumb-rx"></div>
+        </div>
+      </div>
+
+      <div class="slider-row">
+        <div class="slider-header">
+          <span class="slider-label">Right Stick Y (RY)</span>
+          <span class="slider-val" id="val-ry">5%</span>
+        </div>
+        <div class="slider-track" id="track-ry">
+          <div class="slider-fill" id="fill-ry"></div>
+          <div class="slider-thumb" id="thumb-ry"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- WAITLIST -->
+<section id="waitlist">
+  <div class="section-label" style="justify-content:center">Early Access</div>
+  <h2 class="section-title reveal">Get In Early.<br><span style="color:var(--cyan)">Play Clean.</span></h2>
+  <p class="waitlist-sub reveal">Windows PC only for now. Drop your email and we'll notify you when early access opens.</p>
+  <div class="waitlist-form reveal">
+    <input type="email" id="emailInput" placeholder="your@email.com" autocomplete="off">
+    <button onclick="handleSignup()">Get Early Access</button>
+  </div>
+  <p class="waitlist-note reveal">No spam. Beta access notification only. Unsubscribe anytime.</p>
+  <div class="success-msg" id="successMsg">✓ &nbsp; You're on the list. We'll reach out when early access opens.</div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">Drift<span style="color:var(--cyan)">Core</span></div>
+  <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
+      <a href="/cdn-cgi/l/email-protection#e38586868781828088a387918a8597808c9186cd808c8ecd8296" style="font-family:'Share Tech Mono',monospace;font-size:0.7rem;letter-spacing:0.12em;color:var(--cyan);text-decoration:none;transition:opacity 0.2s" onmouseover="this.style.opacity='0.7'" onmouseout="this.style.opacity='1'"><span class="__cf_email__" data-cfemail="7f191a1a1b1d1e1c143f1b0d16190b1c100d1a511c1012511e0a">[email&#160;protected]</span></a>
+      <div class="footer-note">Windows 10 / 11 x64 &nbsp;·&nbsp; Xbox XInput Controllers &nbsp;·&nbsp; v0.9 Beta &nbsp;·&nbsp; © 2025 DriftCore</div>
+    </div>
+</footer>
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+  // Cursor glow
+  const glow = document.getElementById('cursorGlow');
+  document.addEventListener('mousemove', e => {
+    glow.style.left = e.clientX + 'px';
+    glow.style.top  = e.clientY + 'px';
+  });
+
+  // Scroll reveal
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); } });
+  }, { threshold: 0.1 });
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+  // Waitlist
+  function handleSignup() {
+    const input = document.getElementById('emailInput');
+    const msg   = document.getElementById('successMsg');
+    if (!input.value || !input.value.includes('@')) {
+      input.style.borderColor = '#ff2d78';
+      setTimeout(() => input.style.borderColor = '', 1400);
+      return;
+    }
+    input.parentElement.style.display = 'none';
+    msg.style.display = 'block';
+  }
+  document.getElementById('emailInput').addEventListener('keydown', e => { if (e.key === 'Enter') handleSignup(); });
+
+  // ── SLIDERS ──
+  // Uses pointer events — no state leakage, works on mouse and touch
+  function makeSlider(trackId, fillId, thumbId, valId, initPct) {
+    const track = document.getElementById(trackId);
+    const fill  = document.getElementById(fillId);
+    const thumb = document.getElementById(thumbId);
+    const label = document.getElementById(valId);
+
+    function applyPct(raw) {
+      const pct = Math.max(0, Math.min(100, raw));
+      fill.style.width  = pct + '%';
+      thumb.style.left  = pct + '%';
+      label.textContent = Math.round(pct) + '%';
+      return pct;
+    }
+
+    function pctFromPointer(e) {
+      const r = track.getBoundingClientRect();
+      return ((e.clientX - r.left) / r.width) * 100;
+    }
+
+    // Click anywhere on track
+    track.addEventListener('pointerdown', e => {
+      track.setPointerCapture(e.pointerId);
+      thumb.classList.add('active');
+      applyPct(pctFromPointer(e));
+      e.preventDefault();
+    });
+
+    track.addEventListener('pointermove', e => {
+      if (!track.hasPointerCapture(e.pointerId)) return;
+      applyPct(pctFromPointer(e));
+    });
+
+    track.addEventListener('pointerup', e => {
+      track.releasePointerCapture(e.pointerId);
+      thumb.classList.remove('active');
+    });
+
+    track.addEventListener('pointercancel', e => {
+      track.releasePointerCapture(e.pointerId);
+      thumb.classList.remove('active');
+    });
+
+    applyPct(initPct);
+  }
+
+  makeSlider('track-lx'
