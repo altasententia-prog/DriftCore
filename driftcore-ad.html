@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:ital,wght@0,700;1,900&display=swap" rel="stylesheet">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    width: 1200px;
+    height: 628px;
+    overflow: hidden;
+    background: #060608;
+    font-family: 'Bebas Neue', sans-serif;
+  }
+
+  .flier {
+    width: 1200px;
+    height: 628px;
+    position: relative;
+    overflow: hidden;
+    background: #060608;
+  }
+
+  /* ── BACKGROUND LAYERS ── */
+
+  /* deep radial glow — cyan left, pink right */
+  .bg-glow {
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(ellipse 55% 80% at 18% 60%, rgba(0,229,255,0.18) 0%, transparent 70%),
+      radial-gradient(ellipse 50% 70% at 82% 50%, rgba(255,45,120,0.22) 0%, transparent 65%),
+      radial-gradient(ellipse 40% 50% at 50% 100%, rgba(120,0,200,0.15) 0%, transparent 60%);
+  }
+
+  /* diagonal slash divider */
+  .bg-slash {
+    position: absolute; inset: 0;
+    background: linear-gradient(108deg,
+      transparent 0%,
+      transparent 38%,
+      rgba(0,229,255,0.04) 38%,
+      rgba(0,229,255,0.07) 50%,
+      rgba(255,45,120,0.05) 50%,
+      rgba(255,45,120,0.03) 62%,
+      transparent 62%
+    );
+  }
+
+  /* grid overlay */
+  .bg-grid {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(0,229,255,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,229,255,0.04) 1px, transparent 1px);
+    background-size: 40px 40px;
+    mask-image: radial-gradient(ellipse 90% 90% at 50% 50%, black 30%, transparent 100%);
+  }
+
+  /* scanlines */
+  .bg-scan {
+    position: absolute; inset: 0;
+    background: repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,0,0,0.06) 3px, rgba(0,0,0,0.06) 4px);
+    pointer-events: none;
+  }
+
+  /* top cyan bar */
+  .top-bar {
+    position: absolute; top: 0; left: 0; right: 0; height: 4px;
+    background: linear-gradient(90deg, #00e5ff 0%, #00e5ff 55%, #ff2d78 55%, #ff2d78 100%);
+  }
+
+  /* bottom bar */
+  .bottom-bar {
+    position: absolute; bottom: 0; left: 0; right: 0; height: 3px;
+    background: linear-gradient(90deg, #ff2d78 0%, #ff2d78 40%, #00e5ff 40%, #00e5ff 100%);
+    opacity: 0.6;
+  }
+
+  /* ── BEAR — left side, large, bleeding off bottom ── */
+  .bear {
+    position: absolute;
+    left: -30px;
+    bottom: -40px;
+    width: 420px;
+    height: auto;
+    filter:
+      drop-shadow(0 0 40px rgba(0,229,255,0.5))
+      drop-shadow(0 0 80px rgba(0,229,255,0.25))
+      drop-shadow(-8px 8px 0px rgba(0,0,0,0.8));
+    z-index: 10;
+    transform: rotate(-4deg);
+  }
+
+  /* ── BUNNY — right side ── */
+  .bunny {
+    position: absolute;
+    right: -20px;
+    bottom: -20px;
+    width: 360px;
+    height: auto;
+    filter:
+      drop-shadow(0 0 40px rgba(255,45,120,0.5))
+      drop-shadow(0 0 80px rgba(255,45,120,0.2))
+      drop-shadow(8px 8px 0px rgba(0,0,0,0.8));
+    z-index: 10;
+    transform: rotate(3deg);
+  }
+
+  /* ── CENTRE CONTENT ── */
+  .centre {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -52%);
+    text-align: center;
+    z-index: 20;
+    width: 480px;
+  }
+
+  /* version pill */
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: #00e5ff;
+    border: 1px solid rgba(0,229,255,0.3);
+    background: rgba(0,229,255,0.07);
+    padding: 5px 16px;
+    margin-bottom: 16px;
+  }
+  .pill::before {
+    content: '';
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: #00e5ff;
+    box-shadow: 0 0 8px #00e5ff;
+    animation: blink 2s ease-in-out infinite;
+  }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
+
+  /* logo wordmark */
+  .wordmark {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 100px;
+    line-height: 0.88;
+    letter-spacing: 0.06em;
+    color: #d8dee8;
+    text-shadow:
+      0 0 40px rgba(0,229,255,0.3),
+      0 4px 0 rgba(0,0,0,0.8);
+    margin-bottom: 4px;
+  }
+  .wordmark .core {
+    color: #ff2d78;
+    text-shadow:
+      0 0 40px rgba(255,45,120,0.4),
+      0 4px 0 rgba(0,0,0,0.8);
+  }
+
+  /* tagline */
+  .tagline {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-style: italic;
+    font-weight: 900;
+    font-size: 22px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #00e5ff;
+    margin-bottom: 20px;
+    text-shadow: 0 0 20px rgba(0,229,255,0.6);
+  }
+
+  /* sub copy */
+  .copy {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #7a8490;
+    margin-bottom: 24px;
+    line-height: 1.5;
+  }
+  .copy span { color: #d8dee8; }
+
+  /* price block */
+  .price-block {
+    display: inline-flex;
+    align-items: stretch;
+    gap: 0;
+    border: 1px solid rgba(0,229,255,0.25);
+    margin-bottom: 22px;
+    background: rgba(0,0,0,0.5);
+  }
+  .price-item {
+    padding: 10px 20px;
+    border-right: 1px solid rgba(0,229,255,0.15);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+  }
+  .price-item:last-child { border-right: none; }
+  .price-amt {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 26px;
+    letter-spacing: 0.06em;
+    color: #00e5ff;
+    line-height: 1;
+  }
+  .price-flag {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    color: #7a8490;
+    text-transform: uppercase;
+  }
+
+  /* CTA button */
+  .cta {
+    display: inline-block;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    letter-spacing: 0.18em;
+    color: #00e5ff;
+    background: #ff2d78;
+    padding: 13px 42px;
+    clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px));
+    text-decoration: none;
+    box-shadow: 0 0 30px rgba(255,45,120,0.4), 0 0 60px rgba(255,45,120,0.15);
+    position: relative;
+  }
+  .cta::after {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 50%);
+    pointer-events: none;
+  }
+
+  /* ── BOTTOM STRIP ── */
+  .bottom-strip {
+    position: absolute;
+    bottom: 14px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 30;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: #2a3040;
+  }
+  .bottom-strip span { color: #3a4555; }
+  .bottom-strip .dot {
+    width: 3px; height: 3px; border-radius: 50%;
+    background: rgba(0,229,255,0.3);
+    display: inline-block;
+  }
+
+  /* ── CORNER DECORATIONS ── */
+  .corner {
+    position: absolute;
+    width: 28px; height: 28px;
+    z-index: 25;
+  }
+  .corner.tl { top: 12px; left: 12px; border-top: 2px solid #00e5ff; border-left: 2px solid #00e5ff; }
+  .corner.tr { top: 12px; right: 12px; border-top: 2px solid #ff2d78; border-right: 2px solid #ff2d78; }
+  .corner.bl { bottom: 12px; left: 12px; border-bottom: 2px solid #ff2d78; border-left: 2px solid #ff2d78; }
+  .corner.br { bottom: 12px; right: 12px; border-bottom: 2px solid #00e5ff; border-right: 2px solid #00e5ff; }
+
+  /* ── DRIP ACCENTS ── */
+  .drip {
+    position: absolute;
+    top: 0;
+    width: 3px;
+    border-radius: 0 0 3px 3px;
+    z-index: 5;
+  }
+  .drip-1 { left: 22%; height: 60px; background: linear-gradient(to bottom, #00e5ff, transparent); opacity: 0.5; }
+  .drip-2 { left: 35%; height: 40px; background: linear-gradient(to bottom, #00e5ff, transparent); opacity: 0.3; }
+  .drip-3 { right: 28%; height: 55px; background: linear-gradient(to bottom, #ff2d78, transparent); opacity: 0.5; }
+  .drip-4 { right: 18%; height: 35px; background: linear-gradient(to bottom, #ff2d78, transparent); opacity: 0.3; }
+
+  /* splatter dots */
+  .splat {
+    position: absolute;
+    border-radius: 50%;
+    z-index: 6;
+  }
+
+  /* url watermark */
+  .url {
+    position: absolute;
+    top: 18px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: rgba(0,229,255,0.25);
+    z-index: 30;
+  }
+
+</style>
+</head>
+<body>
+<div class="flier">
+
+  <!-- backgrounds -->
+  <div class="bg-glow"></div>
+  <div class="bg-slash"></div>
+  <div class="bg-grid"></div>
+  <div class="bg-scan"></div>
+
+  <!-- bars -->
+  <div class="top-bar"></div>
+  <div class="bottom-bar"></div>
+
+  <!-- corner brackets -->
+  <div class="corner tl"></div>
+  <div class="corner tr"></div>
+  <div class="corner bl"></div>
+  <div class="corner br"></div>
+
+  <!-- drips from top -->
+  <div class="drip drip-1"></div>
+  <div class="drip drip-2"></div>
+  <div class="drip drip-3"></div>
+  <div class="drip drip-4"></div>
+
+  <!-- splatter dots -->
+  <div class="splat" style="width:6px;height:6px;background:#00e5ff;opacity:0.6;top:55px;left:28%;box-shadow:0 0 8px #00e5ff;"></div>
+  <div class="splat" style="width:4px;height:4px;background:#00e5ff;opacity:0.4;top:72px;left:31%;"></div>
+  <div class="splat" style="width:8px;height:8px;background:#ff2d78;opacity:0.5;top:48px;right:22%;box-shadow:0 0 8px #ff2d78;"></div>
+  <div class="splat" style="width:4px;height:4px;background:#ff2d78;opacity:0.35;top:68px;right:26%;"></div>
+  <div class="splat" style="width:5px;height:5px;background:#ff2d78;opacity:0.3;top:80px;right:19%;"></div>
+  <div class="splat" style="width:10px;height:10px;background:#00e5ff;opacity:0.12;top:200px;left:38%;border-radius:50%;"></div>
+  <div class="splat" style="width:7px;height:7px;background:#ff2d78;opacity:0.15;bottom:160px;right:42%;border-radius:50%;"></div>
+
+  <!-- url top centre -->
+  <div class="url">driftcore.com.au</div>
+
+  <!-- BEAR — left -->
+  <img class="bear" src="bear.jpg" alt="DriftCore Bear">
+
+  <!-- BUNNY — right -->
+  <img class="bunny" src="bunny.png" alt="DriftCore Bunny">
+
+  <!-- CENTRE -->
+  <div class="centre">
+    <div class="pill">Windows PC · Now Live</div>
+
+    <div class="wordmark">DRIFT<span class="core">CORE</span></div>
+
+    <div class="tagline">Your Stick Needs Therapy.</div>
+
+    <div class="copy">
+      <span>Fix Xbox stick drift in software.</span><br>
+      No mods. No teardowns. No new controller.
+    </div>
+
+    <div class="price-block">
+      <div class="price-item">
+        <div class="price-amt">£9.99</div>
+        <div class="price-flag">🇬🇧 GBP</div>
+      </div>
+      <div class="price-item">
+        <div class="price-amt">$13.40</div>
+        <div class="price-flag">🇺🇸 USD</div>
+      </div>
+      <div class="price-item">
+        <div class="price-amt">$9.99</div>
+        <div class="price-flag">🇦🇺 AUD</div>
+      </div>
+    </div>
+
+    <div>
+      <div class="cta">Get It On Gumroad</div>
+    </div>
+  </div>
+
+  <!-- bottom strip -->
+  <div class="bottom-strip">
+    <span>Windows 10 / 11 x64</span>
+    <span class="dot"></span>
+    <span>Xbox XInput Controllers</span>
+    <span class="dot"></span>
+    <span>One-Time Purchase</span>
+    <span class="dot"></span>
+    <span>No Subscription</span>
+  </div>
+
+</div>
+</body>
+</html>
